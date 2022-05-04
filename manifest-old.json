@@ -23,5 +23,10 @@
     "webRequest",
     "storage",
     "https://ao3.themimegas.com/*"
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "65.0"
+    }
+  }
 }

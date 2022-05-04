@@ -13,7 +13,6 @@
     "js": ["work_page.js"]
   }],
   "permissions": [
-    "webRequest",
     "storage"
   ],
   "host_permissions": [
