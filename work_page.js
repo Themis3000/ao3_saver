@@ -1,7 +1,7 @@
 if (is404()) {
   insertFindButtons();
 } else {
-  setTimeout(archiveIfNotSaved, 50);
+  setTimeout(archiveIfNotSaved, 5000);
 }
 
 if (typeof browser === "undefined") {
@@ -29,7 +29,7 @@ function archive(workId, updated) {
   const requestJson = JSON.stringify({work_id: workId, updated_time: updated});
 
   //Report the work to the backend
-  fetch(`http://localhost:8000/report_work`, {
+  fetch(`https://ao3.themimegas.com/report_work`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -47,7 +47,7 @@ function insertFindButtons() {
   const workId = getWorkId();
   const main = document.querySelector("#main");
   const container = document.createElement("div");
-  const ao3Saver = createButton("Check on ao3 saver", `http://localhost:8000/works/${workId}`);
+  const ao3Saver = createButton("Check on ao3 saver", `https://ao3.themimegas.com/works/${workId}`);
   const archivePdf = createButton("Check for pdf on archive.org", `https://web.archive.org/web/*/https://archiveofourown.org/downloads/${workId}/*`);
   const archive = createButton("Check on archive.org", `https://web.archive.org/web/*/https://archiveofourown.org/works/${workId}/*`);
   container.appendChild(ao3Saver);
