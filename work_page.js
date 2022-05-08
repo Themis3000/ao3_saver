@@ -1,7 +1,12 @@
+const url = document.URL;
+const urlArr = url.split("/");
+
 if (is404()) {
   insertFindButtons();
-} else {
+} else if (isWork()) {
   setTimeout(archiveIfNotSaved, 5000);
+} else {
+  console.log("This page does not contain a work");
 }
 
 if (typeof browser === "undefined") {
@@ -12,13 +17,12 @@ function archiveIfNotSaved() {
   const workId = getWorkId();
   const updated = getUpdated();
   browser.storage.local.get(workId, result => {
-    if (!result) {
-      return;
-    }
     const storedUpdate = result[workId];
     //check if current version of work has been archived already
     if (storedUpdate !== updated) {
       archive(workId, updated);
+    } else {
+      console.log("Stored date was equal to the last updated date: did not archive.")
     }
   });
 }
@@ -66,16 +70,18 @@ function createButton(text, url) {
 }
 
 function getWorkId() {
-  const url = document.URL;
-  const urlArr = url.split("/");
   return parseInt(urlArr[4]).toString();
 }
 
 function getUpdated() {
-  const dateStr = document.querySelector("dd.published").textContent;
+  const dateStr = document.querySelector("dd.status").textContent;
   return Date.parse(dateStr);
 }
 
 function is404() {
   return document.querySelector(".error-404") !== null;
+}
+
+function isWork() {
+  return urlArr.length >= 5;
 }
