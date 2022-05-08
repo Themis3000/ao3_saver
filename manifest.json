@@ -13,14 +13,13 @@
     "js": ["work_page.js"]
   }],
   "permissions": [
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://ao3.themimegas.com/*"
   ],
-  "browser_action": {
-    "default_icon": "/images/icon48.png",
-    "default_title": "ao3 saver",
+  "action": {
     "default_popup": "/popup/popup.html"
   }
 }
