@@ -6,9 +6,9 @@ const works = document.getElementById("works");
 const search = document.getElementById("search");
 
 const test_set = [
-  {"title": "a new day", "author": "kelil", "accessed": "5-4-21", "id": 493687},
-  {"title": "as the time goes by", "author": "mama", "accessed": "4-7-22", "id": 53765},
-  {"title": "very long titles make great stories I heard said no one ever", "author": "astec giant", "accessed": "8-7-22", "id": 34683}
+  {"title": "a new day", "author": "kelil", "accessed": 1649289600000, "id": 493687},
+  {"title": "as the time goes by", "author": "mama", "accessed": 1656892800000, "id": 53765},
+  {"title": "very long titles make great stories I heard said no one ever", "author": "astec giant", "accessed": 1659830400000, "id": 34683}
 ];
 
 listItems(test_set);
@@ -28,7 +28,8 @@ function listItem(item) {
   leftContainer.appendChild(document.createElement("br"));
   leftContainer.appendChild(author);
   const rightContainer = document.createElement("div");
-  rightContainer.innerText = item["accessed"];
+  const accessedDate = new Date(item["accessed"]);
+  rightContainer.innerText = accessedDate.toLocaleDateString();
   container.appendChild(leftContainer);
   container.appendChild(rightContainer);
   works.appendChild(container);
@@ -36,6 +37,7 @@ function listItem(item) {
 
 function listItems(items) {
   works.innerHTML = "";
+  items.sort((a, b) => a["accessed"] < b["accessed"]);
   for (item of items) {
     listItem(item);
   }
