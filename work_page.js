@@ -16,13 +16,19 @@ if (typeof browser === "undefined") {
 function archiveIfNotSaved() {
   const workId = getWorkId();
   const updated = getUpdated();
-  browser.storage.local.get(workId, result => {
-    const storedUpdate = result[workId];
+  const dbKey = `work_${workId}`;
+  browser.storage.local.get(dbKey, result => {
+    const storedData = result[dbKey];
     //check if current version of work has been archived already
-    if (storedUpdate !== updated) {
+    if (storedData === undefined || storedData["updated"] !== updated) {
       archive(workId, updated);
     } else {
-      console.log("Stored date was equal to the last updated date: did not archive.")
+      console.log("Stored date was equal to the last updated date: did not archive.");
+      //record last accessed time
+      const objectStore = {};
+      objectStore[dbKey] = storedData;
+      objectStore[dbKey]["accessed"] = Date.now();
+      browser.storage.local.set(objectStore);
     }
   });
 }
@@ -40,9 +46,15 @@ function archive(workId, updated) {
     },
     body: requestJson
   }).then(() => {
-    //Record that the work has been archived
+    //Record work details
     const objectStore = {};
-    objectStore[workId] = updated;
+    objectStore[`work_${workId}`] = {
+      "updated": updated,
+      "accessed": Date.now(),
+      "author": getAuthor(),
+      "title": getTitle(),
+      "id": workId
+    };
     browser.storage.local.set(objectStore);
   });
 }
@@ -76,6 +88,14 @@ function getWorkId() {
 function getUpdated() {
   const dateStr = document.querySelector("dd.status").textContent;
   return Date.parse(dateStr);
+}
+
+function getTitle() {
+  return document.querySelector("div.preface.group > h2.title.heading").textContent.trim();
+}
+
+function getAuthor() {
+  return document.querySelector("a[rel=author]").textContent;
 }
 
 function is404() {

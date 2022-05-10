@@ -1,17 +1,16 @@
-//if (typeof browser === "undefined") {
-//  var browser = chrome;
-//}
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
 
 const works = document.getElementById("works");
 const search = document.getElementById("search");
+let worksData = [];
 
-const test_set = [
-  {"title": "a new day", "author": "kelil", "accessed": 1649289600000, "id": 493687},
-  {"title": "as the time goes by", "author": "mama", "accessed": 1656892800000, "id": 53765},
-  {"title": "very long titles make great stories I heard said no one ever", "author": "astec giant", "accessed": 1659830400000, "id": 34683}
-];
 
-listItems(test_set);
+browser.storage.local.get(null, results => {
+  worksData = Object.keys(results).map(key => results[key]);
+  listItems(worksData);
+});
 
 function listItem(item) {
   const container = document.createElement("a");
@@ -43,11 +42,10 @@ function listItems(items) {
   }
 }
 
-
 search.oninput = () => {
   const text = search.value;
   const textLower = text.toLowerCase();
-  const filteredWorks = test_set.filter(work => {
+  const filteredWorks = worksData.filter(work => {
     const title = work["title"].toLowerCase();
     const author = work["author"].toLowerCase();
     return title.includes(textLower) || author.includes(textLower);
