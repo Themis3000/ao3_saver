@@ -56,6 +56,17 @@ function archive(workId, updated) {
       "id": workId
     };
     browser.storage.local.set(objectStore);
+  }).catch(() => {
+    //Record work details, but set updated time to 0 so archive will be retried later
+    const objectStore = {};
+    objectStore[`work_${workId}`] = {
+      "updated": 0,
+      "accessed": Date.now(),
+      "author": getAuthor(),
+      "title": getTitle(),
+      "id": workId
+    };
+    browser.storage.local.set(objectStore);
   });
 }
 
