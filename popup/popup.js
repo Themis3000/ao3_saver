@@ -29,7 +29,6 @@ function listItem(item) {
   const rightContainer = document.createElement("div");
   const accessedDate = new Date(item["accessed"]);
   rightContainer.innerText = accessedDate.toLocaleDateString();
-  rightContainer.innerText = item["accessed"];
   container.appendChild(leftContainer);
   container.appendChild(rightContainer);
   works.appendChild(container);
