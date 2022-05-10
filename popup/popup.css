@@ -25,3 +25,24 @@ html body {
     font-size: 15px;
     font-weight: bold;
 }
+
+#search {
+    margin: .2857em .429em;
+    border: none;
+    padding: .15em .25em;
+    border-radius: 1em;
+    color: #444;
+    box-shadow: none;
+    line-height: 1.286;
+    height: 1.286em;
+    vertical-align: middle;
+    flex-grow: 100;
+}
+
+.searchContainer {
+    display: flex;
+    width: 100%;
+    background: #900 url(../images/red-ao3.png);
+    padding: 0 0;
+    box-shadow: inset 0 -6px 10px rgba(0,0,0,.35) , 1px 1px 3px -1px rgba(0,0,0,.25) , inset 0 -1px 0 rgba(0,0,0,.85);
+}
