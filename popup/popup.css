@@ -1,7 +1,11 @@
 html body {
     width: 500px;
-    height: 300px;
     font-family: "Times New Roman", sans-serif;
+}
+
+#works {
+    height: 300px;
+    overflow: auto;
 }
 
 .work {

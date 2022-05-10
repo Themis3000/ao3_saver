@@ -97,8 +97,11 @@ function getWorkId() {
 }
 
 function getUpdated() {
-  const dateStr = document.querySelector("dd.status").textContent;
-  return Date.parse(dateStr);
+  const dateElement = document.querySelector("dd.status");
+  if (dateElement === null) {
+    return 0
+  }
+  return Date.parse(dateElement.textContent);
 }
 
 function getTitle() {
@@ -106,7 +109,11 @@ function getTitle() {
 }
 
 function getAuthor() {
-  return document.querySelector("a[rel=author]").textContent;
+  const authorElement = document.querySelector("a[rel=author]");
+  if (authorElement === null) {
+    return "Anonymous";
+  }
+  return authorElement.textContent;
 }
 
 function is404() {

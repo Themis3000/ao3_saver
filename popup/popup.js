@@ -29,6 +29,7 @@ function listItem(item) {
   const rightContainer = document.createElement("div");
   const accessedDate = new Date(item["accessed"]);
   rightContainer.innerText = accessedDate.toLocaleDateString();
+  rightContainer.innerText = item["accessed"];
   container.appendChild(leftContainer);
   container.appendChild(rightContainer);
   works.appendChild(container);
@@ -36,7 +37,7 @@ function listItem(item) {
 
 function listItems(items) {
   works.innerHTML = "";
-  items.sort((a, b) => a["accessed"] < b["accessed"]);
+  items.sort((a, b) => b["accessed"] - a["accessed"]);
   for (item of items) {
     listItem(item);
   }
