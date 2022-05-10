@@ -3,6 +3,7 @@
 //}
 
 const works = document.getElementById("works");
+const search = document.getElementById("search");
 
 const test_set = [
   {"title": "a new day", "author": "kelil", "accessed": "5-4-21", "id": 493687},
@@ -38,4 +39,16 @@ function listItems(items) {
   for (item of items) {
     listItem(item);
   }
+}
+
+
+search.oninput = () => {
+  const text = search.value;
+  const textLower = text.toLowerCase();
+  const filteredWorks = test_set.filter(work => {
+    const title = work["title"].toLowerCase();
+    const author = work["author"].toLowerCase();
+    return title.includes(textLower) || author.includes(textLower);
+  });
+  listItems(filteredWorks);
 }
