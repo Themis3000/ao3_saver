@@ -8,7 +8,11 @@ let worksData = [];
 
 
 browser.storage.local.get(null, results => {
-  worksData = Object.keys(results).map(key => results[key]);
+  for (const key in results) {
+    if (key.startsWith("work_")) {
+      worksData.push(results[key]);
+    }
+  }
   listItems(worksData);
 });
 
