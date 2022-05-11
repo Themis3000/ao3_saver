@@ -1,36 +1,40 @@
 const url = document.URL;
 const urlArr = url.split("/");
 
-if (is404()) {
-  insertFindButtons();
-} else if (isWork()) {
-  setTimeout(archiveIfNotSaved, 5000);
-} else {
-  console.log("This page does not contain a work");
-}
-
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
-function archiveIfNotSaved() {
-  const workId = getWorkId();
-  const updated = getUpdated();
-  const dbKey = `work_${workId}`;
-  browser.storage.local.get(dbKey, result => {
-    const storedData = result[dbKey];
-    //check if current version of work has been archived already
-    if (storedData === undefined || storedData["updated"] !== updated) {
-      archive(workId, updated);
-    } else {
-      console.log("Stored date was equal to the last updated date: did not archive.");
-      //record last accessed time
-      const objectStore = {};
-      objectStore[dbKey] = storedData;
-      objectStore[dbKey]["accessed"] = Date.now();
-      browser.storage.local.set(objectStore);
-    }
-  });
+if (is404()) {
+  console.log("This is a 404 page: did not archive.");
+  insertFindButtons();
+} else if (isWork()) {
+  if (isWarning()) {
+    console.log("This is a warning page: did not archive.");
+  } else {
+    buildArchiveStatus();
+    const workId = getWorkId();
+    const updated = getUpdated();
+    setTimeout(() => archive(workId, updated), 5000);
+  }
+} else {
+  console.log("This page does not contain a work: did not archive.");
+}
+
+function buildArchiveStatus() {
+  const statsContainer = document.querySelector("dl.stats");
+  const title = document.createElement("dt");
+  title.innerText = "Backup status:";
+  const value = document.createElement("dd");
+  value.innerText = "Loading...";
+  value.id = "ao3saverValue";
+  statsContainer.appendChild(title);
+  statsContainer.appendChild(value);
+}
+
+function displayArchiveStatus(status) {
+  const value = document.getElementById("ao3saverValue");
+  value.innerText = status;
 }
 
 function archive(workId, updated) {
@@ -45,8 +49,25 @@ function archive(workId, updated) {
       'Content-Type': 'application/json'
     },
     body: requestJson
-  }).then(() => {
+  }).then(response => {
+    if (!response.ok) {
+      //Record work details, but set updated time to -1 so archive will be retried later
+      console.log("archive unsuccessful");
+      displayArchiveStatus("❌ unsuccessful. The server may be down. If this continues please contact mail@themimegas.com");
+      const objectStore = {};
+      objectStore[`work_${workId}`] = {
+        "updated": -1,
+        "accessed": Date.now(),
+        "author": getAuthor(),
+        "title": getTitle(),
+        "id": workId
+      };
+      browser.storage.local.set(objectStore);
+    }
+
     //Record work details
+    console.log("archive success");
+    displayArchiveStatus("✅ archived!");
     const objectStore = {};
     objectStore[`work_${workId}`] = {
       "updated": updated,
@@ -57,16 +78,7 @@ function archive(workId, updated) {
     };
     browser.storage.local.set(objectStore);
   }).catch(() => {
-    //Record work details, but set updated time to 0 so archive will be retried later
-    const objectStore = {};
-    objectStore[`work_${workId}`] = {
-      "updated": 0,
-      "accessed": Date.now(),
-      "author": getAuthor(),
-      "title": getTitle(),
-      "id": workId
-    };
-    browser.storage.local.set(objectStore);
+    displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@themimegas.com");
   });
 }
 
@@ -122,4 +134,8 @@ function is404() {
 
 function isWork() {
   return urlArr.length >= 5;
+}
+
+function isWarning() {
+  return document.querySelector("p.caution") !== null;
 }
