@@ -10,14 +10,24 @@ html body {
 
 #settings {
     display: none;
+    font-size: 125%;
 }
 
-#settingsGear {
+#settings p {
+    margin-block-start: 5px;
+    margin-block-end: 5px;
+}
+
+#timeDelay {
+    width: 4em;
+}
+
+.topItem {
     height: 1.286em;
     margin: .2857em .429em .2857em 0;
 }
 
-#settingsGear:hover {
+.topItem:hover {
     cursor: pointer;
 }
 
