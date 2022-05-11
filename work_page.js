@@ -4,7 +4,11 @@ const urlArr = url.split("/");
 if (is404()) {
   insertFindButtons();
 } else if (isWork()) {
-  setTimeout(archiveIfNotSaved, 5000);
+  if (isWarning()) {
+    console.log("This is a warning page: did not archive.");
+  } else {
+    setTimeout(archiveIfNotSaved, 5000);
+  }
 } else {
   console.log("This page does not contain a work");
 }
@@ -122,4 +126,8 @@ function is404() {
 
 function isWork() {
   return urlArr.length >= 5;
+}
+
+function isWarning() {
+  return document.querySelector("p.caution") !== null;
 }
