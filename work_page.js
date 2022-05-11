@@ -6,39 +6,22 @@ if (typeof browser === "undefined") {
 }
 
 if (is404()) {
+  console.log("This is a 404 page: did not archive.");
   insertFindButtons();
 } else if (isWork()) {
   if (isWarning()) {
     console.log("This is a warning page: did not archive.");
   } else {
-    archiveIfNotSaved();
+    const workId = getWorkId();
+    const updated = getUpdated();
+    setTimeout(() => archive(workId, updated), 5000);
   }
 } else {
-  console.log("This page does not contain a work");
+  console.log("This page does not contain a work: did not archive.");
 }
 
 function displayArchiveStatus() {
 
-}
-
-function archiveIfNotSaved() {
-  const workId = getWorkId();
-  const updated = getUpdated();
-  const dbKey = `work_${workId}`;
-  browser.storage.local.get(dbKey, result => {
-    const storedData = result[dbKey];
-    //check if current version of work has been archived already
-    if (storedData === undefined || storedData["updated"] !== updated) {
-      setTimeout(() => archive(workId, updated), 5000);
-    } else {
-      console.log("Stored date was equal to the last updated date: did not archive.");
-      //record last accessed time
-      const objectStore = {};
-      objectStore[dbKey] = storedData;
-      objectStore[dbKey]["accessed"] = Date.now();
-      browser.storage.local.set(objectStore);
-    }
-  });
 }
 
 function archive(workId, updated) {
