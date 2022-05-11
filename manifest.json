@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ao3 saver",
   "description": "automatically backup ao3 works so you never lose what you're reading again",
-  "version": "0.1.1",
+  "version": "0.2.3",
   "icons": {
     "16": "/images/icon16.png",
     "48": "/images/icon48.png",
@@ -13,9 +13,13 @@
     "js": ["work_page.js"]
   }],
   "permissions": [
-    "storage"
+    "storage",
+    "contextMenus"
   ],
   "host_permissions": [
     "https://ao3.themimegas.com/*"
-  ]
+  ],
+  "action": {
+    "default_popup": "/popup/popup.html"
+  }
 }
