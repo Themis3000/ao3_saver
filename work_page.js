@@ -1,20 +1,24 @@
 const url = document.URL;
 const urlArr = url.split("/");
 
+if (typeof browser === "undefined") {
+  var browser = chrome;
+}
+
 if (is404()) {
   insertFindButtons();
 } else if (isWork()) {
   if (isWarning()) {
     console.log("This is a warning page: did not archive.");
   } else {
-    setTimeout(archiveIfNotSaved, 5000);
+    archiveIfNotSaved();
   }
 } else {
   console.log("This page does not contain a work");
 }
 
-if (typeof browser === "undefined") {
-  var browser = chrome;
+function displayArchiveStatus() {
+
 }
 
 function archiveIfNotSaved() {
@@ -25,7 +29,7 @@ function archiveIfNotSaved() {
     const storedData = result[dbKey];
     //check if current version of work has been archived already
     if (storedData === undefined || storedData["updated"] !== updated) {
-      archive(workId, updated);
+      setTimeout(() => archive(workId, updated), 5000);
     } else {
       console.log("Stored date was equal to the last updated date: did not archive.");
       //record last accessed time
@@ -51,6 +55,7 @@ function archive(workId, updated) {
     body: requestJson
   }).then(() => {
     //Record work details
+    console.log("archive success");
     const objectStore = {};
     objectStore[`work_${workId}`] = {
       "updated": updated,
@@ -61,10 +66,11 @@ function archive(workId, updated) {
     };
     browser.storage.local.set(objectStore);
   }).catch(() => {
-    //Record work details, but set updated time to 0 so archive will be retried later
+    //Record work details, but set updated time to -1 so archive will be retried later
+    console.log("archive unsuccessful");
     const objectStore = {};
     objectStore[`work_${workId}`] = {
-      "updated": 0,
+      "updated": -1,
       "accessed": Date.now(),
       "author": getAuthor(),
       "title": getTitle(),
