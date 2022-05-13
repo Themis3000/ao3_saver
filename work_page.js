@@ -5,28 +5,36 @@ if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
-if (is404()) {
-  console.log("This is a 404 page: did not archive.");
-  insertFindButtons();
-} else if (isWork()) {
-  if (isWarning()) {
-    console.log("This is a warning page: did not archive.");
-  } else {
-    buildArchiveStatus();
-    const workId = getWorkId();
-    const updated = getUpdated();
-    setTimeout(() => archive(workId, updated), 5000);
+browser.storage.local.get("settings", results => {
+  const settings = results["settings"];
+  if (settings === undefined) {
+    settings["timeDelay"] = 5;
   }
-} else {
-  console.log("This page does not contain a work: did not archive.");
-}
+
+  if (is404()) {
+    console.log("This is a 404 page: did not archive.");
+    insertFindButtons();
+  } else if (isWork()) {
+    if (isWarning()) {
+      console.log("This is a warning page: did not archive.");
+    } else {
+      buildArchiveStatus();
+      const workId = getWorkId();
+      const updated = getUpdated();
+      console.log(`timeout for ${settings['timeDelay'] * 1000}ms`)
+      setTimeout(() => archive(workId, updated), settings["timeDelay"] * 1000);
+    }
+  } else {
+    console.log("This page does not contain a work: did not archive.");
+  }
+});
 
 function buildArchiveStatus() {
   const statsContainer = document.querySelector("dl.stats");
   const title = document.createElement("dt");
   title.innerText = "Backup status:";
   const value = document.createElement("dd");
-  value.innerText = "Loading...";
+  value.innerText = "Waiting for delay...";
   value.id = "ao3saverValue";
   statsContainer.appendChild(title);
   statsContainer.appendChild(value);
@@ -39,6 +47,7 @@ function displayArchiveStatus(status) {
 
 function archive(workId, updated) {
   console.log("archiving...");
+  displayArchiveStatus("Loading...")
 
   const requestJson = JSON.stringify({work_id: workId, updated_time: updated});
 

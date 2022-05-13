@@ -6,11 +6,23 @@
     <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div class="searchContainer">
-        <label for="search"></label>
-        <input type="text" id="search" placeholder="Search..." autocomplete="off" />
+    <div id="home">
+        <div class="searchContainer">
+            <label for="search"></label>
+            <input type="text" id="search" placeholder="Search..." autocomplete="off" />
+            <img src="../images/gear.svg" alt="gear" id="settingsGear" class="topItem" />
+        </div>
+        <div id="works">
+        </div>
     </div>
-    <div id="works">
+    <div id="settings">
+        <img src="../images/arrow-left.svg" alt="arrow left" id="backArrow" class="topItem" />
+        <div class="settingsInput">
+            <label for="timeDelay">Archive delay (in seconds):</label>
+            <input type="number" min="5" placeholder="min 5" value="5" id="timeDelay" autocomplete="off" />s<br>
+            <p>Controls the delay between visiting a work and requesting archival from the server.</p>
+            <button id="saveSettings">Save</button>
+        </div>
     </div>
     <script src="popup.js"></script>
 </body>

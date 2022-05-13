@@ -4,6 +4,8 @@ if (typeof browser === "undefined") {
 
 const works = document.getElementById("works");
 const search = document.getElementById("search");
+const home = document.getElementById("home");
+const settings = document.getElementById("settings");
 let worksData = [];
 
 
@@ -56,3 +58,34 @@ search.oninput = () => {
   });
   listItems(filteredWorks);
 }
+
+//settings code
+document.getElementById("settingsGear").onclick = () => {
+  home.style.display = "none";
+  settings.style.display = "block";
+};
+
+document.getElementById("backArrow").onclick = () => {
+  settings.style.display = "none";
+  home.style.display = "block";
+};
+
+const delayInput = document.getElementById("timeDelay");
+
+browser.storage.local.get("settings", results => {
+  const settings = results["settings"];
+  if (settings === undefined) {
+    return;
+  }
+  delayInput.value = settings["timeDelay"].toString();
+});
+
+document.getElementById("saveSettings").onclick = () => {
+  const timeDelay = parseInt(delayInput.value);
+  if (5 > timeDelay) {
+    delayInput.value = "5";
+    return;
+  }
+  const objectStore = {"settings": {"timeDelay": parseInt(delayInput.value)}};
+  browser.storage.local.set(objectStore);
+};
