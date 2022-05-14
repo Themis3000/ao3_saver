@@ -1,14 +1,16 @@
 const url = document.URL;
 const urlArr = url.split("/");
 
+console.log("testing printing to the firefox console");
+
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
 browser.storage.local.get("settings", results => {
-  const settings = results["settings"];
+  let settings = results["settings"];
   if (settings === undefined) {
-    settings["timeDelay"] = 5;
+    settings = {"timeDelay": 5};
   }
 
   if (is404()) {
