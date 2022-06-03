@@ -1,8 +1,6 @@
 const url = document.URL;
 const urlArr = url.split("/");
 
-console.log("testing printing to the firefox console");
-
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
