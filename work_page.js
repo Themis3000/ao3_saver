@@ -121,11 +121,14 @@ function getWorkId() {
 }
 
 function getUpdated() {
-  const dateElement = document.querySelector("dd.status");
-  if (dateElement === null) {
+  const downloadButton = document.querySelector("li.download a[href*='.pdf?updated_at=']");
+  if (downloadButton === null) {
     return 0;
   }
-  return Date.parse(dateElement.textContent);
+  const dlLink = downloadButton.href
+  const updatedRegex = /\?updated_at=(\d*)/;
+  const results = dlLink.match(updatedRegex);
+  return parseInt(results[1]);
 }
 
 function getTitle() {
