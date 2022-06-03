@@ -50,7 +50,7 @@ function displayArchiveStatus(status) {
 
 function archive(workId, updated) {
   console.log("archiving...");
-  displayArchiveStatus("Loading...")
+  displayArchiveStatus("Loading...");
 
   const requestJson = JSON.stringify({work_id: workId, updated_time: updated});
 
@@ -148,7 +148,8 @@ function is404() {
 }
 
 function isWork() {
-  return urlArr.length >= 5;
+  const isWorkRegex = /^https:\/\/archiveofourown\.org\/works\/\d*(\/|$|\?)/;
+  return isWorkRegex.test(url);
 }
 
 function isWarning() {
