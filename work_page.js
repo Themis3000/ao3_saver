@@ -1,8 +1,6 @@
 const url = document.URL;
 const urlArr = url.split("/");
 
-console.log("testing printing to the firefox console");
-
 if (typeof browser === "undefined") {
   var browser = chrome;
 }
@@ -19,6 +17,9 @@ browser.storage.local.get("settings", results => {
   } else if (isWork()) {
     if (isWarning()) {
       console.log("This is a warning page: did not archive.");
+    } else if (isHidden()) {
+      console.log("Work is hidden: did not archive");
+      insertFindButtons();
     } else {
       buildArchiveStatus();
       const workId = getWorkId();
@@ -122,7 +123,7 @@ function getWorkId() {
 function getUpdated() {
   const dateElement = document.querySelector("dd.status");
   if (dateElement === null) {
-    return 0
+    return 0;
   }
   return Date.parse(dateElement.textContent);
 }
@@ -149,4 +150,8 @@ function isWork() {
 
 function isWarning() {
   return document.querySelector("p.caution") !== null;
+}
+
+function isHidden() {
+  return document.querySelector("p.notice > a[href='/collections/cog_Private']") !== null;
 }
