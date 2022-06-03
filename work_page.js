@@ -50,7 +50,7 @@ function displayArchiveStatus(status) {
 
 function archive(workId, updated) {
   console.log("archiving...");
-  displayArchiveStatus("Loading...")
+  displayArchiveStatus("Loading...");
 
   const requestJson = JSON.stringify({work_id: workId, updated_time: updated});
 
@@ -121,11 +121,14 @@ function getWorkId() {
 }
 
 function getUpdated() {
-  const dateElement = document.querySelector("dd.status");
-  if (dateElement === null) {
+  const downloadButton = document.querySelector("li.download a[href*='.pdf?updated_at=']");
+  if (downloadButton === null) {
     return 0;
   }
-  return Date.parse(dateElement.textContent);
+  const dlLink = downloadButton.href
+  const updatedRegex = /\?updated_at=(\d*)/;
+  const results = dlLink.match(updatedRegex);
+  return parseInt(results[1]);
 }
 
 function getTitle() {
@@ -145,7 +148,8 @@ function is404() {
 }
 
 function isWork() {
-  return urlArr.length >= 5;
+  const isWorkRegex = /^https:\/\/archiveofourown\.org\/works\/\d*(\/|$|\?)/;
+  return isWorkRegex.test(url);
 }
 
 function isWarning() {
