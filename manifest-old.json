@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "ao3 saver",
   "description": "automatically backup ao3 works so you never lose what you're reading again",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "icons": {
     "16": "/images/icon16.png",
     "48": "/images/icon48.png",
