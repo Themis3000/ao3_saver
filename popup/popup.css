@@ -83,3 +83,13 @@ html body {
     border:0;
     height:36px;
 }
+
+.rightContainer {
+    display: flex;
+    height: 100%;
+}
+
+.downloadIcon {
+    width: 32px;
+    height: 32px;
+}
