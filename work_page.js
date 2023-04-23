@@ -11,8 +11,8 @@ browser.storage.local.get("settings", results => {
     settings = {"timeDelay": 5};
   }
 
-  if (is404()) {
-    console.log("This is a 404 page: did not archive.");
+  if (is404() || is503()) {
+    console.log("This is a 404/503 page: did not archive.");
     insertFindButtons();
   } else if (isWork()) {
     if (isWarning()) {
@@ -145,6 +145,10 @@ function getAuthor() {
 
 function is404() {
   return document.querySelector(".error-404") !== null;
+}
+
+function is503() {
+  return document.querySelector(".error-503") !== null;
 }
 
 function isWork() {
