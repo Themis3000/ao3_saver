@@ -65,7 +65,7 @@ function archive(workId, updated) {
     if (!response.ok) {
       //Record work details, but set updated time to -1 so archive will be retried later
       console.log("archive unsuccessful");
-      displayArchiveStatus("❌ unsuccessful. The server may be down. If this continues please contact mail@themimegas.com");
+      displayArchiveStatus("❌ unsuccessful. The server may be down or unable to reach ao3. If this continues please contact mail@themimegas.com");
       const objectStore = {};
       objectStore[`work_${workId}`] = {
         "updated": -1,
@@ -75,6 +75,7 @@ function archive(workId, updated) {
         "id": workId
       };
       browser.storage.local.set(objectStore);
+      return;
     }
 
     //Record work details
