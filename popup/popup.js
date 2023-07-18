@@ -114,7 +114,7 @@ document.getElementById("bulkDownloadButton").onclick = () => {
   });
   const requestJson = JSON.stringify({works: worksReq});
 
-  fetch(`http://localhost:8000/works/dl/bulk_prepare`, {
+  fetch(`https://ao3.themimegas.com/works/dl/bulk_prepare`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -128,7 +128,7 @@ document.getElementById("bulkDownloadButton").onclick = () => {
     }
     const response_data = await response.json();
     const download_id = response_data["dl_id"];
-    const download_url = `http://localhost:8000/works/dl/bulk_dl/${download_id}`;
+    const download_url = `https://ao3.themimegas.com/works/dl/bulk_dl/${download_id}`;
     window.open(download_url, '_blank');
   });
 };
