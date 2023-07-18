@@ -100,3 +100,35 @@ document.getElementById("saveSettings").onclick = () => {
   const objectStore = {"settings": {"timeDelay": parseInt(delayInput.value)}};
   browser.storage.local.set(objectStore);
 };
+
+document.getElementById("bulkDownloadButton").onclick = () => {
+  const userAccept = confirm(`Warning: this will download ${worksData.length} works, are you sure you want to continue?`);
+
+  if (!userAccept) {
+    alert("Cancelled download");
+    return;
+  }
+
+  const worksReq = worksData.map((workData) => {
+    return {work_id: workData.id, title: workData.title};
+  });
+  const requestJson = JSON.stringify({works: worksReq});
+
+  fetch(`http://localhost:8000/works/dl/bulk_prepare`, {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: requestJson
+  }).then(async response => {
+    if (!response.ok) {
+      console.log(response);
+      alert("Error downloading works!");
+      return;
+    }
+    const response_data = await response.json();
+    const download_id = response_data["dl_id"];
+    const download_url = `http://localhost:8000/works/dl/bulk_dl/${download_id}`;
+    window.open(download_url, '_blank');
+  });
+};
