@@ -8,7 +8,7 @@ if (typeof browser === "undefined") {
 browser.storage.local.get("settings", results => {
   let settings = results["settings"];
   if (settings === undefined) {
-    settings = {"timeDelay": 5};
+    settings = {"timeDelay": 10};
   }
 
   if (is404() || is503()) {
@@ -24,13 +24,29 @@ browser.storage.local.get("settings", results => {
       buildArchiveStatus();
       const workId = getWorkId();
       const updated = getUpdated();
-      console.log(`timeout for ${settings['timeDelay'] * 1000}ms`)
-      setTimeout(() => archive(workId, updated), settings["timeDelay"] * 1000);
+      const timeout_sec = 10 > settings["timeDelay"] ? 10 : settings["timeDelay"];
+      doArchiveDelay(workId, updated, timeout_sec * 1000);
     }
   } else {
     console.log("This page does not contain a work: did not archive.");
   }
 });
+
+function doArchiveDelay(workId, updated, delay, retry = true) {
+  console.log(`timeout for ${delay}ms`);
+  setTimeout(() => {
+    if (!document.hasFocus()) {
+      console.log("Window wasn't focused, cancelling archive.");
+      if (retry) {
+        console.log("retrying...");
+        doArchiveDelay(workId, updated, delay, retry);
+      }
+      return;
+    }
+
+    archive(workId, updated);
+  }, delay);
+}
 
 function buildArchiveStatus() {
   const statsContainer = document.querySelector("dl.stats");
@@ -91,7 +107,7 @@ function archive(workId, updated) {
     };
     browser.storage.local.set(objectStore);
   }).catch(() => {
-    displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@themimegas.com");
+    displayArchiveStatus("❌ unsuccessful. A network error has occurred. If this continues please contact mail@themimegas.com");
   });
 }
 

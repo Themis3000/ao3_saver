@@ -93,8 +93,8 @@ browser.storage.local.get("settings", results => {
 
 document.getElementById("saveSettings").onclick = () => {
   const timeDelay = parseInt(delayInput.value);
-  if (5 > timeDelay) {
-    delayInput.value = "5";
+  if (10 > timeDelay) {
+    delayInput.value = "10";
     return;
   }
   const objectStore = {"settings": {"timeDelay": parseInt(delayInput.value)}};
