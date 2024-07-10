@@ -9,22 +9,26 @@ let settings;
 
 browser.storage.local.get("settings", results => {
   settings = results["settings"];
+  let do_settings_update = false;
   if (settings === undefined) {
     settings = {};
   }
   if (!("timeDelay" in settings)) {
     settings = {"timeDelay": 5};
+    do_settings_update = true;
   }
   if (!("client_id" in settings)) {
     settings["client_id"] = generateUUID();
+    do_settings_update = true;
   }
-  if (settings !== results["settings"]) {
+  if (!("display_limit" in settings)) {
+    settings["display_limit"] = 200;
+    do_settings_update = true;
+  }
+  if (do_settings_update) {
     console.log("updating settings default value");
-    browser.storage.local.set(settings);
+    browser.storage.local.set({"settings": settings});
   }
-  // if (settings.get("display_limit") === undefined) {
-  //   settings["display_limit"] = 200;
-  // }
 
   if (is404() || is503()) {
     console.log("This is a 404/503 page: did not archive.");
