@@ -17,6 +17,7 @@ browser.storage.local.get("settings", results => {
   }
   delayInput.value = settings["timeDelay"].toString();
   displayLimitInput.value = settings["displayLimit"].toString();
+  serverAddressInput.value = settings["serverAddress"];
 
   browser.storage.local.get("recentsIndex", async results => {
     const index = results["recentsIndex"];
@@ -103,6 +104,7 @@ document.getElementById("backArrow").onclick = () => {
 
 const delayInput = document.getElementById("timeDelay");
 const displayLimitInput = document.getElementById("displayLimit");
+const serverAddressInput = document.getElementById("serverAddress");
 
 document.getElementById("saveSettings").onclick = () => {
   const timeDelay = parseInt(delayInput.value);
@@ -115,10 +117,16 @@ document.getElementById("saveSettings").onclick = () => {
     displayLimitInput.value = "100";
     return;
   }
+  const serverAddress = serverAddressInput.value;
+  if (serverAddress.length < 7) {
+    serverAddress.value = "http://127.0.0.1:8000";
+    return;
+  }
 
   const objectStore = {"settings": {
       "timeDelay": parseInt(delayInput.value),
-      "displayLimit": parseInt(displayLimitInput.value)
+      "displayLimit": parseInt(displayLimitInput.value),
+      "serverAddress": serverAddress.value,
   }};
   browser.storage.local.set(objectStore);
 };

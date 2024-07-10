@@ -48,6 +48,10 @@ browser.storage.local.get("settings", results => {
     settings["displayLimit"] = 100;
     do_settings_update = true;
   }
+  if (!("serverAddress" in settings)) {
+    settings["serverAddress"] = "http://127.0.0.1:8000";
+    do_settings_update = true;
+  }
   if (do_settings_update) {
     console.log("updating settings default value");
     browser.storage.local.set({"settings": settings});
