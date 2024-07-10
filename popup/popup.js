@@ -7,15 +7,28 @@ const search = document.getElementById("search");
 const home = document.getElementById("home");
 const settings = document.getElementById("settings");
 let worksData = [];
+let indexWorksData = [];
 
 
-browser.storage.local.get(null, results => {
-  for (const key in results) {
-    if (key.startsWith("work_")) {
-      worksData.push(results[key]);
-    }
+browser.storage.local.get("settings", results => {
+  let settings = results["settings"];
+  if (settings === undefined) {
+    return;
   }
-  listItems(worksData);
+  delayInput.value = settings["timeDelay"].toString();
+  displayLimitInput.value = settings["displayLimit"].toString();
+
+  browser.storage.local.get("recentsIndex", async results => {
+    const index = results["recentsIndex"];
+    for (const item of index) {
+      const workDataResults = await browser.storage.local.get(item);
+      const workData = workDataResults[item];
+      indexWorksData.push(workData);
+      if (indexWorksData.length >= settings["displayLimit"])
+        break;
+    }
+    listItems(indexWorksData);
+  });
 });
 
 function listItem(item) {
@@ -54,13 +67,18 @@ function listItem(item) {
 function listItems(items) {
   works.innerHTML = "";
   items.sort((a, b) => b["accessed"] - a["accessed"]);
-  for (item of items) {
+  for (const item of items) {
     listItem(item);
   }
 }
 
-search.oninput = () => {
+search.oninput = async () => {
   const text = search.value;
+  if (2 >= text.length) {
+    listItems(indexWorksData);
+    return;
+  }
+  await fetchAllWorks();
   const textLower = text.toLowerCase();
   const filteredWorks = worksData.filter(work => {
     const title = work["title"].toLowerCase();
@@ -84,15 +102,6 @@ document.getElementById("backArrow").onclick = () => {
 const delayInput = document.getElementById("timeDelay");
 const displayLimitInput = document.getElementById("displayLimit");
 
-browser.storage.local.get("settings", results => {
-  let settings = results["settings"];
-  if (settings === undefined) {
-    return;
-  }
-  delayInput.value = settings["timeDelay"].toString();
-  displayLimitInput.value = settings["displayLimit"].toString();
-});
-
 document.getElementById("saveSettings").onclick = () => {
   const timeDelay = parseInt(delayInput.value);
   if (5 > timeDelay) {
@@ -112,7 +121,7 @@ document.getElementById("saveSettings").onclick = () => {
   browser.storage.local.set(objectStore);
 };
 
-document.getElementById("bulkDownloadButton").onclick = () => {
+document.getElementById("bulkDownloadButton").onclick = async () => {
   const userAccept = confirm(`Warning: this will download ${worksData.length} works, are you sure you want to continue?`);
 
   if (!userAccept) {
@@ -120,6 +129,7 @@ document.getElementById("bulkDownloadButton").onclick = () => {
     return;
   }
 
+  await fetchAllWorks();
   const worksReq = worksData.map((workData) => {
     return {work_id: workData.id, title: workData.title};
   });
@@ -143,3 +153,13 @@ document.getElementById("bulkDownloadButton").onclick = () => {
     window.open(download_url, '_blank');
   });
 };
+
+async function fetchAllWorks() {
+  if (worksData.length !== 0)
+    return;
+  const results = await browser.storage.local.get(null);
+  for (const key in results) {
+    if (key.startsWith("work_"))
+      worksData.push(results[key]);
+  }
+}

@@ -119,7 +119,8 @@ function archive(workId, updated) {
 
     //Record work details
     const objectStore = {};
-    objectStore[`work_${workId}`] = {
+    const objectKey = `work_${workId}`
+    objectStore[objectKey] = {
       "updated": updated,
       "accessed": Date.now(),
       "author": getAuthor(),
@@ -127,6 +128,19 @@ function archive(workId, updated) {
       "id": workId
     };
     browser.storage.local.set(objectStore);
+
+    //Record work in index
+    const recentsResults = await browser.storage.local.get("recentsIndex");
+    let recents = recentsResults["recentsIndex"];
+    const oldIndex = recents.indexOf(objectKey);
+    if (oldIndex !== -1) {
+      recents.splice(oldIndex, 1);
+    }
+    recents.unshift(objectKey);
+    if (recents.length > 200) {
+      recents = recents.slice(0, 200);
+    }
+    browser.storage.local.set({"recentsIndex": recents});
 
     if (resData["status"] === "already fetched") {
       displayArchiveStatus("✅ archived!");
