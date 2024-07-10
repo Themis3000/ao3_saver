@@ -1,4 +1,3 @@
-- Show only the first 200 or so items on the scrollable list. Use some sort of index to determine which 200 are the most recent, maybe?
 - Insert plug for open collective instead of ko-fi
 - Update to new domain
   - Allow any domain to be put in settings. Default to correct one.

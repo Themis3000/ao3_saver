@@ -80,11 +80,13 @@ search.oninput = async () => {
   }
   await fetchAllWorks();
   const textLower = text.toLowerCase();
-  const filteredWorks = worksData.filter(work => {
+  let filteredWorks = worksData.filter(work => {
     const title = work["title"].toLowerCase();
     const author = work["author"].toLowerCase();
     return title.includes(textLower) || author.includes(textLower);
   });
+  if (filteredWorks.length !== 0)
+    filteredWorks.splice(0, settings['displayLimit']);
   listItems(filteredWorks);
 }
 
