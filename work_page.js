@@ -7,6 +7,24 @@ if (typeof browser === "undefined") {
 
 let settings;
 
+// Add recents_index if it doesn't exist (this happens if updating from an older version.)
+browser.storage.local.get("recentsIndex", async results => {
+  const recents = results["recentsIndex"];
+  if (recents !== undefined)
+    return;
+
+  const works_results = await browser.storage.local.get(null);
+  let worksData = [];
+  for (const key in works_results) {
+    if (key.startsWith("work_")) {
+      worksData.push(results[key]);
+    }
+  }
+  worksData.sort((a, b) => b["accessed"] - a["accessed"]);
+  const recentsIndex = worksData.splice(0, 200);
+  browser.storage.local.set({"recentsIndex": recentsIndex});
+});
+
 browser.storage.local.get("settings", results => {
   settings = results["settings"];
   let do_settings_update = false;
@@ -22,7 +40,7 @@ browser.storage.local.get("settings", results => {
     do_settings_update = true;
   }
   if (!("displayLimit" in settings)) {
-    settings["displayLimit"] = 200;
+    settings["displayLimit"] = 100;
     do_settings_update = true;
   }
   if (do_settings_update) {
