@@ -82,13 +82,15 @@ document.getElementById("backArrow").onclick = () => {
 };
 
 const delayInput = document.getElementById("timeDelay");
+const displayLimitInput = document.getElementById("displayLimit");
 
 browser.storage.local.get("settings", results => {
-  const settings = results["settings"];
+  let settings = results["settings"];
   if (settings === undefined) {
     return;
   }
   delayInput.value = settings["timeDelay"].toString();
+  displayLimitInput.value = settings["displayLimit"].toString();
 });
 
 document.getElementById("saveSettings").onclick = () => {
@@ -97,7 +99,16 @@ document.getElementById("saveSettings").onclick = () => {
     delayInput.value = "5";
     return;
   }
-  const objectStore = {"settings": {"timeDelay": parseInt(delayInput.value)}};
+  const displayLimit = parseInt(displayLimitInput.value);
+  if (1 > displayLimit || displayLimit > 200) {
+    displayLimitInput.value = "100";
+    return;
+  }
+
+  const objectStore = {"settings": {
+      "timeDelay": parseInt(delayInput.value),
+      "displayLimit": parseInt(displayLimitInput.value)
+  }};
   browser.storage.local.set(objectStore);
 };
 

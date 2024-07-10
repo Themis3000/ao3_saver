@@ -17,12 +17,12 @@ browser.storage.local.get("settings", results => {
     settings = {"timeDelay": 5};
     do_settings_update = true;
   }
-  if (!("client_id" in settings)) {
-    settings["client_id"] = generateUUID();
+  if (!("clientId" in settings)) {
+    settings["clientId"] = generateUUID();
     do_settings_update = true;
   }
-  if (!("display_limit" in settings)) {
-    settings["display_limit"] = 200;
+  if (!("displayLimit" in settings)) {
+    settings["displayLimit"] = 200;
     do_settings_update = true;
   }
   if (do_settings_update) {
@@ -71,7 +71,7 @@ function archive(workId, updated) {
   console.log("archiving...");
   displayArchiveStatus("Loading...");
 
-  const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["client_id"]});
+  const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["clientId"]});
 
   //Report the work to the backend
   fetch(`http://127.0.0.1:8000/report_work`, {
