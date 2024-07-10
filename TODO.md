@@ -1,4 +1,3 @@
 - Insert plug for open collective instead of ko-fi
 - Update to new domain
-  - Allow any domain to be put in settings. Default to correct one.
 - Add link to changelist

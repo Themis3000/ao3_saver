@@ -101,7 +101,7 @@ function archive(workId, updated) {
   const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["clientId"]});
 
   //Report the work to the backend
-  fetch(`http://127.0.0.1:8000/report_work`, {
+  fetch(`${settings["serverAddress"]}/report_work`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -167,7 +167,7 @@ function archive(workId, updated) {
     const delays = [6, 3, 5, 5, 8, 10, 10, 15, 20, 20, 20, 20, 30, 60, 60, 60, 60, 60, 60];
     for (const delay of delays) {
       displayArchiveStatus("Fetching status...");
-      const jobStatus = await fetch(`http://127.0.0.1:8000/job_status?job_id=${jobId}`, {method: "GET"});
+      const jobStatus = await fetch(`${settings["serverAddress"]}/job_status?job_id=${jobId}`, {method: "GET"});
       if (!jobStatus.ok) {
         displayArchiveStatus("There was an error fetching status...");
         continue;
@@ -196,7 +196,7 @@ function insertFindButtons() {
   const workId = getWorkId();
   const main = document.querySelector("#main");
   const container = document.createElement("div");
-  const ao3Saver = createButton("Check on ao3 saver", `https://ao3.themimegas.com/works/${workId}`);
+  const ao3Saver = createButton("Check on ao3 saver", `${settings["serverAddress"]}/works/${workId}`);
   const archivePdf = createButton("Check for pdf on archive.org", `https://web.archive.org/web/*/https://archiveofourown.org/downloads/${workId}/*`);
   const archive = createButton("Check on archive.org", `https://web.archive.org/web/*/https://archiveofourown.org/works/${workId}/*`);
   container.appendChild(ao3Saver);
