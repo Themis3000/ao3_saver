@@ -20,8 +20,13 @@ browser.storage.local.get("recentsIndex", async results => {
       worksData.push(results[key]);
     }
   }
-  worksData.sort((a, b) => b["accessed"] - a["accessed"]);
-  const recentsIndex = worksData.splice(0, 200);
+  let recentsIndex;
+  if (worksData.length !== 0) {
+    worksData.sort((a, b) => b["accessed"] - a["accessed"]);
+    recentsIndex = worksData.splice(0, 200);
+  } else {
+    recentsIndex = [];
+  }
   browser.storage.local.set({"recentsIndex": recentsIndex});
 });
 
