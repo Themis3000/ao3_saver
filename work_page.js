@@ -5,11 +5,26 @@ if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
+let settings;
+
 browser.storage.local.get("settings", results => {
-  let settings = results["settings"];
+  settings = results["settings"];
   if (settings === undefined) {
+    settings = {};
+  }
+  if (!("timeDelay" in settings)) {
     settings = {"timeDelay": 5};
   }
+  if (!("client_id" in settings)) {
+    settings["client_id"] = generateUUID();
+  }
+  if (settings !== results["settings"]) {
+    console.log("updating settings default value");
+    browser.storage.local.set(settings);
+  }
+  // if (settings.get("display_limit") === undefined) {
+  //   settings["display_limit"] = 200;
+  // }
 
   if (is404() || is503()) {
     console.log("This is a 404/503 page: did not archive.");
@@ -52,16 +67,16 @@ function archive(workId, updated) {
   console.log("archiving...");
   displayArchiveStatus("Loading...");
 
-  const requestJson = JSON.stringify({work_id: workId, updated_time: updated});
+  const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["client_id"]});
 
   //Report the work to the backend
-  fetch(`https://ao3.themimegas.com/report_work`, {
+  fetch(`http://127.0.0.1:8000/report_work`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
     },
     body: requestJson
-  }).then(response => {
+  }).then(async response => {
     if (!response.ok) {
       //Record work details, but set updated time to -1 so archive will be retried later
       console.log("archive unsuccessful");
@@ -78,9 +93,9 @@ function archive(workId, updated) {
       return;
     }
 
+    const resData = await response.json();
+
     //Record work details
-    console.log("archive success");
-    displayArchiveStatus("✅ archived!");
     const objectStore = {};
     objectStore[`work_${workId}`] = {
       "updated": updated,
@@ -90,6 +105,43 @@ function archive(workId, updated) {
       "id": workId
     };
     browser.storage.local.set(objectStore);
+
+    if (resData["status"] === "already fetched") {
+      displayArchiveStatus("✅ archived!");
+      return;
+    }
+
+    if(resData["status"] !== "queued") {
+      displayArchiveStatus("An unexpected error occurred while checking initial status.");
+    }
+
+    displayArchiveStatus("⏳ In archival queue");
+    console.log("Hit archival queue");
+
+    const jobId = resData["job_id"];
+    const delays = [6, 3, 5, 5, 8, 10, 10, 15, 20, 20, 20, 20, 30, 60, 60, 60, 60, 60, 60];
+    for (const delay of delays) {
+      displayArchiveStatus("Fetching status...");
+      const jobStatus = await fetch(`http://127.0.0.1:8000/job_status?job_id=${jobId}`, {method: "GET"});
+      if (!jobStatus.ok) {
+        displayArchiveStatus("There was an error fetching status...");
+        continue;
+      }
+      const jobStatusData = await jobStatus.json();
+      if (jobStatusData["status"] === "queued") {
+        displayArchiveStatus("⏳ In archival queue");
+      } else if (jobStatusData["status"] === "failed") {
+        displayArchiveStatus("❌ Failed archival!");
+        break;
+      } else if (jobStatusData["status"] === "completed") {
+        displayArchiveStatus("✅ archived!");
+        break;
+      } else {
+        displayArchiveStatus("An unexpected error occurred while checking followup status.");
+      }
+      await sleep(delay*1000);
+    }
+
   }).catch(() => {
     displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@themimegas.com");
   });
@@ -163,4 +215,25 @@ function isWarning() {
 
 function isHidden() {
   return document.querySelector("p.notice > a[href='/collections/cog_Private']") !== null;
+}
+
+//https://stackoverflow.com/a/8809472/5813879
+function generateUUID() { // Public Domain/MIT
+    var d = new Date().getTime();//Timestamp
+    var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16;//random number between 0 and 16
+        if(d > 0){//Use timestamp until depleted
+            r = (d + r)%16 | 0;
+            d = Math.floor(d/16);
+        } else {//Use microseconds since page-load if supported
+            r = (d2 + r)%16 | 0;
+            d2 = Math.floor(d2/16);
+        }
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
