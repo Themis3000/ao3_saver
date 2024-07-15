@@ -4,6 +4,9 @@ import os
 chrome_zf = zipfile.ZipFile('chrome.zip', 'w')
 firefox_zf = zipfile.ZipFile('firefox.zip', 'w')
 for dirname, subdirs, files in os.walk("./"):
+    print(dirname, subdirs, files)
+    if dirname.startswith("./."):
+        continue
     chrome_zf.write(dirname)
     firefox_zf.write(dirname)
     for filename in files:
