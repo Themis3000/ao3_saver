@@ -5,10 +5,56 @@ if (typeof browser === "undefined") {
   var browser = chrome;
 }
 
+let settings;
+
+// Add recents_index if it doesn't exist (this happens if updating from an older version.)
+browser.storage.local.get("recentsIndex", async results => {
+  const recents = results["recentsIndex"];
+  if (recents !== undefined)
+    return;
+
+  const works_results = await browser.storage.local.get(null);
+  let worksData = [];
+  for (const key in works_results) {
+    if (key.startsWith("work_")) {
+      worksData.push(results[key]);
+    }
+  }
+  let recentsIndex;
+  if (worksData.length !== 0) {
+    worksData.sort((a, b) => b["accessed"] - a["accessed"]);
+    recentsIndex = worksData.splice(0, 200);
+  } else {
+    recentsIndex = [];
+  }
+  browser.storage.local.set({"recentsIndex": recentsIndex});
+});
+
 browser.storage.local.get("settings", results => {
-  let settings = results["settings"];
+  settings = results["settings"];
+  let do_settings_update = false;
   if (settings === undefined) {
-    settings = {"timeDelay": 10};
+    settings = {};
+  }
+  if (!("timeDelay" in settings)) {
+    settings = {"timeDelay": 5};
+    do_settings_update = true;
+  }
+  if (!("clientId" in settings)) {
+    settings["clientId"] = generateUUID();
+    do_settings_update = true;
+  }
+  if (!("displayLimit" in settings)) {
+    settings["displayLimit"] = 100;
+    do_settings_update = true;
+  }
+  if (!("serverAddress" in settings)) {
+    settings["serverAddress"] = "https://ao3saver.com";
+    do_settings_update = true;
+  }
+  if (do_settings_update) {
+    console.log("updating settings default value");
+    browser.storage.local.set({"settings": settings});
   }
 
   if (is404() || is503()) {
@@ -24,8 +70,8 @@ browser.storage.local.get("settings", results => {
       buildArchiveStatus();
       const workId = getWorkId();
       const updated = getUpdated();
-      const timeout_sec = 10 > settings["timeDelay"] ? 10 : settings["timeDelay"];
-      doArchiveDelay(workId, updated, timeout_sec * 1000);
+      console.log(`timeout for ${settings['timeDelay'] * 1000}ms`)
+      doArchiveDelay(workId, updated, settings["timeDelay"] * 1000);
     }
   } else {
     console.log("This page does not contain a work: did not archive.");
@@ -67,38 +113,41 @@ function displayArchiveStatus(status) {
 function archive(workId, updated) {
   console.log("archiving...");
   displayArchiveStatus("Loading...");
+  const title = getTitle();
+  const author = getAuthor();
 
-  const requestJson = JSON.stringify({work_id: workId, updated_time: updated});
+  const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["clientId"], title: title, author: author});
 
   //Report the work to the backend
-  fetch(`https://ao3.themimegas.com/report_work`, {
+  fetch(`${settings["serverAddress"]}/report_work`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
     },
     body: requestJson
-  }).then(response => {
+  }).then(async response => {
     if (!response.ok) {
       //Record work details, but set updated time to -1 so archive will be retried later
       console.log("archive unsuccessful");
-      displayArchiveStatus("❌ unsuccessful. The server may be down or unable to reach ao3. If this continues please contact mail@themimegas.com");
+      displayArchiveStatus("❌ unsuccessful. The server may be down or unable to reach ao3. If this continues please contact mail@ao3saver.com");
       const objectStore = {};
       objectStore[`work_${workId}`] = {
         "updated": -1,
         "accessed": Date.now(),
-        "author": getAuthor(),
-        "title": getTitle(),
+        "author": author,
+        "title": title,
         "id": workId
       };
       browser.storage.local.set(objectStore);
       return;
     }
 
+    const resData = await response.json();
+
     //Record work details
-    console.log("archive success");
-    displayArchiveStatus("✅ archived!");
     const objectStore = {};
-    objectStore[`work_${workId}`] = {
+    const objectKey = `work_${workId}`
+    objectStore[objectKey] = {
       "updated": updated,
       "accessed": Date.now(),
       "author": getAuthor(),
@@ -106,8 +155,58 @@ function archive(workId, updated) {
       "id": workId
     };
     browser.storage.local.set(objectStore);
+
+    //Record work in index
+    const recentsResults = await browser.storage.local.get("recentsIndex");
+    let recents = recentsResults["recentsIndex"];
+    const oldIndex = recents.indexOf(objectKey);
+    if (oldIndex !== -1) {
+      recents.splice(oldIndex, 1);
+    }
+    recents.unshift(objectKey);
+    if (recents.length > 200) {
+      recents = recents.slice(0, 200);
+    }
+    browser.storage.local.set({"recentsIndex": recents});
+
+    if (resData["status"] === "already fetched") {
+      displayArchiveStatus("✅ archived!");
+      return;
+    }
+
+    if(resData["status"] !== "queued") {
+      displayArchiveStatus("An unexpected error occurred while checking initial status.");
+    }
+
+    displayArchiveStatus("⏳ In archival queue");
+    console.log("Hit archival queue");
+
+    const jobId = resData["job_id"];
+    const delays = [6, 3, 5, 5, 8, 10, 10, 15, 20, 20, 20, 20, 30, 60, 60, 60, 60, 60, 60];
+    for (const delay of delays) {
+      displayArchiveStatus("Fetching status...");
+      const jobStatus = await fetch(`${settings["serverAddress"]}/job_status?job_id=${jobId}`, {method: "GET"});
+      if (!jobStatus.ok) {
+        displayArchiveStatus("There was an error fetching status...");
+        continue;
+      }
+      const jobStatusData = await jobStatus.json();
+      if (jobStatusData["status"] === "queued") {
+        displayArchiveStatus("⏳ In archival queue");
+      } else if (jobStatusData["status"] === "failed") {
+        displayArchiveStatus("❌ Failed archival!");
+        break;
+      } else if (jobStatusData["status"] === "completed") {
+        displayArchiveStatus("✅ archived!");
+        break;
+      } else {
+        displayArchiveStatus("An unexpected error occurred while checking followup status.");
+      }
+      await sleep(delay*1000);
+    }
+
   }).catch(() => {
-    displayArchiveStatus("❌ unsuccessful. A network error has occurred. If this continues please contact mail@themimegas.com");
+    displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@ao3saver.com");
   });
 }
 
@@ -115,7 +214,7 @@ function insertFindButtons() {
   const workId = getWorkId();
   const main = document.querySelector("#main");
   const container = document.createElement("div");
-  const ao3Saver = createButton("Check on ao3 saver", `https://ao3.themimegas.com/works/${workId}`);
+  const ao3Saver = createButton("Check on ao3 saver", `${settings["serverAddress"]}/works/${workId}`);
   const archivePdf = createButton("Check for pdf on archive.org", `https://web.archive.org/web/*/https://archiveofourown.org/downloads/${workId}/*`);
   const archive = createButton("Check on archive.org", `https://web.archive.org/web/*/https://archiveofourown.org/works/${workId}/*`);
   container.appendChild(ao3Saver);
@@ -179,4 +278,25 @@ function isWarning() {
 
 function isHidden() {
   return document.querySelector("p.notice > a[href='/collections/cog_Private']") !== null;
+}
+
+//https://stackoverflow.com/a/8809472/5813879
+function generateUUID() { // Public Domain/MIT
+    var d = new Date().getTime();//Timestamp
+    var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16;//random number between 0 and 16
+        if(d > 0){//Use timestamp until depleted
+            r = (d + r)%16 | 0;
+            d = Math.floor(d/16);
+        } else {//Use microseconds since page-load if supported
+            r = (d2 + r)%16 | 0;
+            d2 = Math.floor(d2/16);
+        }
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

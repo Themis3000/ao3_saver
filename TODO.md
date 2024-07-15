@@ -1,0 +1,3 @@
+- Insert plug for open collective instead of ko-fi
+- Update to new domain
+- Add link to changelist

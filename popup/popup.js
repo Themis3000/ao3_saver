@@ -7,15 +7,31 @@ const search = document.getElementById("search");
 const home = document.getElementById("home");
 const settings = document.getElementById("settings");
 let worksData = [];
+let indexWorksData = [];
+let serverAddress;
 
 
-browser.storage.local.get(null, results => {
-  for (const key in results) {
-    if (key.startsWith("work_")) {
-      worksData.push(results[key]);
-    }
+browser.storage.local.get("settings", results => {
+  let settings = results["settings"];
+  if (settings === undefined) {
+    return;
   }
-  listItems(worksData);
+  delayInput.value = settings["timeDelay"].toString();
+  displayLimitInput.value = settings["displayLimit"].toString();
+  serverAddressInput.value = settings["serverAddress"];
+  serverAddress = settings["serverAddress"];
+
+  browser.storage.local.get("recentsIndex", async results => {
+    const index = results["recentsIndex"];
+    for (const item of index) {
+      const workDataResults = await browser.storage.local.get(item);
+      const workData = workDataResults[item];
+      indexWorksData.push(workData);
+      if (indexWorksData.length >= settings["displayLimit"])
+        break;
+    }
+    listItems(indexWorksData);
+  });
 });
 
 function listItem(item) {
@@ -39,7 +55,7 @@ function listItem(item) {
   const downloadImg = document.createElement("img");
   downloadImg.src = "../images/download.svg";
   downloadImg.className = "downloadIcon";
-  downloadA.href = `https://ao3.themimegas.com/works/${item['id']}`;
+  downloadA.href = `${serverAddress}/works/${item['id']}`;
   downloadA.target = "_blank";
   downloadA.appendChild(downloadImg);
   rightContainer.appendChild(downloadA);
@@ -54,19 +70,26 @@ function listItem(item) {
 function listItems(items) {
   works.innerHTML = "";
   items.sort((a, b) => b["accessed"] - a["accessed"]);
-  for (item of items) {
+  for (const item of items) {
     listItem(item);
   }
 }
 
-search.oninput = () => {
+search.oninput = async () => {
   const text = search.value;
+  if (2 >= text.length) {
+    listItems(indexWorksData);
+    return;
+  }
+  await fetchAllWorks();
   const textLower = text.toLowerCase();
-  const filteredWorks = worksData.filter(work => {
+  let filteredWorks = worksData.filter(work => {
     const title = work["title"].toLowerCase();
     const author = work["author"].toLowerCase();
     return title.includes(textLower) || author.includes(textLower);
   });
+  if (filteredWorks.length !== 0)
+    filteredWorks.splice(0, settings['displayLimit']);
   listItems(filteredWorks);
 }
 
@@ -82,14 +105,8 @@ document.getElementById("backArrow").onclick = () => {
 };
 
 const delayInput = document.getElementById("timeDelay");
-
-browser.storage.local.get("settings", results => {
-  const settings = results["settings"];
-  if (settings === undefined) {
-    return;
-  }
-  delayInput.value = settings["timeDelay"].toString();
-});
+const displayLimitInput = document.getElementById("displayLimit");
+const serverAddressInput = document.getElementById("serverAddress");
 
 document.getElementById("saveSettings").onclick = () => {
   const timeDelay = parseInt(delayInput.value);
@@ -97,11 +114,26 @@ document.getElementById("saveSettings").onclick = () => {
     delayInput.value = "10";
     return;
   }
-  const objectStore = {"settings": {"timeDelay": parseInt(delayInput.value)}};
+  const displayLimit = parseInt(displayLimitInput.value);
+  if (1 > displayLimit || displayLimit > 200) {
+    displayLimitInput.value = "100";
+    return;
+  }
+  const serverAddress = serverAddressInput.value;
+  if (serverAddress.length < 7) {
+    serverAddress.value = "http://127.0.0.1:8000";
+    return;
+  }
+
+  const objectStore = {"settings": {
+      "timeDelay": parseInt(delayInput.value),
+      "displayLimit": parseInt(displayLimitInput.value),
+      "serverAddress": serverAddress.value,
+  }};
   browser.storage.local.set(objectStore);
 };
 
-document.getElementById("bulkDownloadButton").onclick = () => {
+document.getElementById("bulkDownloadButton").onclick = async () => {
   const userAccept = confirm(`Warning: this will download ${worksData.length} works, are you sure you want to continue?`);
 
   if (!userAccept) {
@@ -109,12 +141,13 @@ document.getElementById("bulkDownloadButton").onclick = () => {
     return;
   }
 
+  await fetchAllWorks();
   const worksReq = worksData.map((workData) => {
     return {work_id: workData.id, title: workData.title};
   });
   const requestJson = JSON.stringify({works: worksReq});
 
-  fetch(`https://ao3.themimegas.com/works/dl/bulk_prepare`, {
+  fetch(`${serverAddress}/works/dl/bulk_prepare`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -128,7 +161,17 @@ document.getElementById("bulkDownloadButton").onclick = () => {
     }
     const response_data = await response.json();
     const download_id = response_data["dl_id"];
-    const download_url = `https://ao3.themimegas.com/works/dl/bulk_dl/${download_id}`;
+    const download_url = `${serverAddress}/works/dl/bulk_dl/${download_id}`;
     window.open(download_url, '_blank');
   });
 };
+
+async function fetchAllWorks() {
+  if (worksData.length !== 0)
+    return;
+  const results = await browser.storage.local.get(null);
+  for (const key in results) {
+    if (key.startsWith("work_"))
+      worksData.push(results[key]);
+  }
+}

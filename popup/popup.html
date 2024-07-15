@@ -21,6 +21,15 @@
             <label for="timeDelay">Archive delay (in seconds):</label>
             <input type="number" min="5" placeholder="min 5" value="5" id="timeDelay" autocomplete="off" />s<br>
             <p>Controls the delay between visiting a work and requesting archival from the server.</p>
+
+            <label for="displayLimit">Home works amount:</label>
+            <input type="number" min="1" placeholder="max 200" value="100" id="displayLimit" autocomplete="off" /><br>
+            <p>Controls the number of works displayed in the list at a time</p>
+
+            <label for="serverAddress">Server address</label>
+            <input type="text" placeholder="your server address" value="http://127.0.0.1:8000" id="serverAddress" autocomplete="off" /><br>
+            <p>Controls which ao3saver server you use. Only change if you know what you're doing.</p>
+
             <button id="saveSettings">Save</button>
         </div>
         <div id="bulkDownload">
