@@ -16,7 +16,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://ao3.themimegas.com/*"
+    "https://ao3saver.com/*"
   ],
   "action": {
     "default_popup": "/popup/popup.html"

@@ -23,7 +23,7 @@
   "permissions": [
     "webRequest",
     "storage",
-    "https://ao3.themimegas.com/*"
+    "https://ao3saver.com/*"
   ],
   "browser_specific_settings": {
     "gecko": {
