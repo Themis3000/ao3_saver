@@ -8,6 +8,7 @@ const home = document.getElementById("home");
 const settings = document.getElementById("settings");
 let worksData = [];
 let indexWorksData = [];
+let serverAddress;
 
 
 browser.storage.local.get("settings", results => {
@@ -18,6 +19,7 @@ browser.storage.local.get("settings", results => {
   delayInput.value = settings["timeDelay"].toString();
   displayLimitInput.value = settings["displayLimit"].toString();
   serverAddressInput.value = settings["serverAddress"];
+  serverAddress = settings["serverAddress"];
 
   browser.storage.local.get("recentsIndex", async results => {
     const index = results["recentsIndex"];
@@ -53,7 +55,7 @@ function listItem(item) {
   const downloadImg = document.createElement("img");
   downloadImg.src = "../images/download.svg";
   downloadImg.className = "downloadIcon";
-  downloadA.href = `https://ao3.themimegas.com/works/${item['id']}`;
+  downloadA.href = `${serverAddress}/works/${item['id']}`;
   downloadA.target = "_blank";
   downloadA.appendChild(downloadImg);
   rightContainer.appendChild(downloadA);
@@ -145,7 +147,7 @@ document.getElementById("bulkDownloadButton").onclick = async () => {
   });
   const requestJson = JSON.stringify({works: worksReq});
 
-  fetch(`https://ao3.themimegas.com/works/dl/bulk_prepare`, {
+  fetch(`${serverAddress}/works/dl/bulk_prepare`, {
     method: "POST",
     headers: {
       'Content-Type': 'application/json'
@@ -159,7 +161,7 @@ document.getElementById("bulkDownloadButton").onclick = async () => {
     }
     const response_data = await response.json();
     const download_id = response_data["dl_id"];
-    const download_url = `https://ao3.themimegas.com/works/dl/bulk_dl/${download_id}`;
+    const download_url = `${serverAddress}/works/dl/bulk_dl/${download_id}`;
     window.open(download_url, '_blank');
   });
 };

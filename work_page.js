@@ -49,7 +49,7 @@ browser.storage.local.get("settings", results => {
     do_settings_update = true;
   }
   if (!("serverAddress" in settings)) {
-    settings["serverAddress"] = "http://127.0.0.1:8000";
+    settings["serverAddress"] = "https://ao3saver.com";
     do_settings_update = true;
   }
   if (do_settings_update) {
@@ -113,7 +113,7 @@ function archive(workId, updated) {
     if (!response.ok) {
       //Record work details, but set updated time to -1 so archive will be retried later
       console.log("archive unsuccessful");
-      displayArchiveStatus("❌ unsuccessful. The server may be down or unable to reach ao3. If this continues please contact mail@themimegas.com");
+      displayArchiveStatus("❌ unsuccessful. The server may be down or unable to reach ao3. If this continues please contact mail@ao3saver.com");
       const objectStore = {};
       objectStore[`work_${workId}`] = {
         "updated": -1,
@@ -190,7 +190,7 @@ function archive(workId, updated) {
     }
 
   }).catch(() => {
-    displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@themimegas.com");
+    displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@ao3saver.com");
   });
 }
 
