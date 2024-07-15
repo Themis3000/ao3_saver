@@ -97,8 +97,10 @@ function displayArchiveStatus(status) {
 function archive(workId, updated) {
   console.log("archiving...");
   displayArchiveStatus("Loading...");
+  const title = getTitle();
+  const author = getAuthor();
 
-  const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["clientId"]});
+  const requestJson = JSON.stringify({work_id: workId, updated_time: updated, reporter: settings["clientId"], title: title, author: author});
 
   //Report the work to the backend
   fetch(`${settings["serverAddress"]}/report_work`, {
@@ -116,8 +118,8 @@ function archive(workId, updated) {
       objectStore[`work_${workId}`] = {
         "updated": -1,
         "accessed": Date.now(),
-        "author": getAuthor(),
-        "title": getTitle(),
+        "author": author,
+        "title": title,
         "id": workId
       };
       browser.storage.local.set(objectStore);
