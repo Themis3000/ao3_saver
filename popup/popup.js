@@ -71,6 +71,7 @@ function listItems(items) {
   works.innerHTML = "";
   items.sort((a, b) => b["accessed"] - a["accessed"]);
   for (const item of items) {
+    console.log(item);
     listItem(item);
   }
 }
