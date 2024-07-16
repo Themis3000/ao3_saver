@@ -136,8 +136,6 @@ function archive(workId, updated) {
     //Record work in index
     const recentsResults = await browser.storage.local.get("recentsIndex");
     let recents = recentsResults["recentsIndex"];
-    console.log("recents index:");
-    console.log(recents);
     const oldIndex = recents.indexOf(objectKey);
     if (oldIndex !== -1) {
       recents.splice(oldIndex, 1);
