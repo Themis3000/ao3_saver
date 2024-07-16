@@ -8,10 +8,13 @@ if (typeof browser === "undefined") {
 let settings;
 
 // Add recents_index if it doesn't exist (this happens if updating from an older version.)
-browser.storage.local.get("recentsIndex", results => {
-  console.log("index detected")
-}).catch(async () => {
-  console.log("building index");
+browser.storage.local.get("recentsIndex", async results => {
+  console.log("recents index running");
+
+  recentsIndex = results["recentsIndex"];
+  if (recentsIndex !== undefined) {
+    return;
+  }
 
   const works_results = await browser.storage.local.get(null);
   let worksData = [];
