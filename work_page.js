@@ -101,7 +101,8 @@ function archive(workId, updated) {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: requestJson
+    body: requestJson,
+    mode: "cors"
   }).then(async response => {
     if (!response.ok) {
       //Record work details, but set updated time to -1 so archive will be retried later
@@ -136,6 +137,8 @@ function archive(workId, updated) {
     //Record work in index
     const recentsResults = await browser.storage.local.get("recentsIndex");
     let recents = recentsResults["recentsIndex"];
+    if (recents === undefined)
+      recents = [];
     const oldIndex = recents.indexOf(objectKey);
     if (oldIndex !== -1) {
       recents.splice(oldIndex, 1);
@@ -182,7 +185,8 @@ function archive(workId, updated) {
       await sleep(delay*1000);
     }
 
-  }).catch(() => {
+  }).catch((err) => {
+    console.log(err);
     displayArchiveStatus("❌ unsuccessful. A network error has occurred (are you offline?). If this continues please contact mail@ao3saver.com");
   });
 }
