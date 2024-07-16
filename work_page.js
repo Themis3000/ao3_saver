@@ -22,7 +22,7 @@ browser.storage.local.get("recentsIndex", async results => {
   let worksData = [];
   for (const key in works_results) {
     if (key.startsWith("work_")) {
-      worksData.push(results[key]);
+      worksData.push(works_results[key]);
     }
   }
   console.log(works_results);
