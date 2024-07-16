@@ -47,7 +47,6 @@ browser.storage.local.get("settings", results => {
       buildArchiveStatus();
       const workId = getWorkId();
       const updated = getUpdated();
-      console.log(`timeout for ${settings['timeDelay'] * 1000}ms`)
       doArchiveDelay(workId, updated, settings["timeDelay"] * 1000);
     }
   } else {
