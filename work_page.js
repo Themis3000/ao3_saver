@@ -25,6 +25,8 @@ browser.storage.local.get("recentsIndex", async results => {
       worksData.push(results[key]);
     }
   }
+  console.log(works_results);
+  console.log(worksData);
   let recentsIndex;
   if (worksData.length !== 0) {
     worksData.sort((a, b) => b["accessed"] - a["accessed"]);
@@ -32,6 +34,7 @@ browser.storage.local.get("recentsIndex", async results => {
   } else {
     recentsIndex = [];
   }
+  console.log(recentsIndex);
   browser.storage.local.set({"recentsIndex": recentsIndex});
 });
 
