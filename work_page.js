@@ -7,38 +7,6 @@ if (typeof browser === "undefined") {
 
 let settings;
 
-// Add recents_index if it doesn't exist (this happens if updating from an older version.)
-browser.storage.local.get("recentsIndex", async results => {
-  console.log("recents index running");
-
-  const currentIndex = results["recentsIndex"];
-  if (currentIndex !== undefined) {
-    console.log("index detected")
-    return;
-  }
-  console.log("no index detected");
-
-  const works_results = await browser.storage.local.get(null);
-  let worksData = [];
-  for (const key in works_results) {
-    if (key.startsWith("work_")) {
-      worksData.push(works_results[key]);
-    }
-  }
-  console.log(works_results);
-  console.log(worksData);
-  let recentsIndex;
-  if (worksData.length !== 0) {
-    worksData.sort((a, b) => b["accessed"] - a["accessed"]);
-    recentsIndex = worksData.splice(0, 200);
-    recentsIndex = recentsIndex.map(value => value[`work_${value['id']}`]);
-  } else {
-    recentsIndex = [];
-  }
-  console.log(recentsIndex);
-  browser.storage.local.set({"recentsIndex": recentsIndex});
-});
-
 browser.storage.local.get("settings", results => {
   settings = results["settings"];
   let do_settings_update = false;
