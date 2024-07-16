@@ -13,8 +13,10 @@ browser.storage.local.get("recentsIndex", async results => {
 
   recentsIndex = results["recentsIndex"];
   if (recentsIndex !== undefined) {
+    console.log("index detected")
     return;
   }
+  console.log("no index detected");
 
   const works_results = await browser.storage.local.get(null);
   let worksData = [];
