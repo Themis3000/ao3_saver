@@ -11,8 +11,8 @@ let settings;
 browser.storage.local.get("recentsIndex", async results => {
   console.log("recents index running");
 
-  recentsIndex = results["recentsIndex"];
-  if (recentsIndex !== undefined) {
+  const currentIndex = results["recentsIndex"];
+  if (currentIndex !== undefined) {
     console.log("index detected")
     return;
   }
