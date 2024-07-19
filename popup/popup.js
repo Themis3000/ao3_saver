@@ -109,10 +109,10 @@ const delayInput = document.getElementById("timeDelay");
 const displayLimitInput = document.getElementById("displayLimit");
 const serverAddressInput = document.getElementById("serverAddress");
 
-document.getElementById("saveSettings").onclick = () => {
+document.getElementById("saveSettings").onclick = async () => {
   const timeDelay = parseInt(delayInput.value);
-  if (10 > timeDelay) {
-    delayInput.value = "10";
+  if (5 > timeDelay) {
+    delayInput.value = "5";
     return;
   }
   const displayLimit = parseInt(displayLimitInput.value);
@@ -126,10 +126,13 @@ document.getElementById("saveSettings").onclick = () => {
     return;
   }
 
+  const settings = await browser.storage.local.get("settings")["settings"]
+
   const objectStore = {"settings": {
+      ...settings,
       "timeDelay": parseInt(delayInput.value),
       "displayLimit": parseInt(displayLimitInput.value),
-      "serverAddress": serverAddress.value,
+      "serverAddress": serverAddress.value
   }};
   browser.storage.local.set(objectStore);
 };

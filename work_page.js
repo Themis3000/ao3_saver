@@ -13,19 +13,19 @@ browser.storage.local.get("settings", results => {
   if (settings === undefined) {
     settings = {};
   }
-  if (!("timeDelay" in settings)) {
+  if (settings["timeDelay"] === undefined) {
     settings = {"timeDelay": 5};
     do_settings_update = true;
   }
-  if (!("clientId" in settings)) {
+  if (settings["clientId"] === undefined) {
     settings["clientId"] = generateUUID();
     do_settings_update = true;
   }
-  if (!("displayLimit" in settings)) {
+  if (settings["displayLimit"] === undefined) {
     settings["displayLimit"] = 100;
     do_settings_update = true;
   }
-  if (!("serverAddress" in settings)) {
+  if (settings["serverAddress"] === undefined) {
     settings["serverAddress"] = "https://ao3saver.com";
     do_settings_update = true;
   }
