@@ -126,14 +126,14 @@ document.getElementById("saveSettings").onclick = async () => {
     return;
   }
 
-  const settings = await browser.storage.local.get("settings")["settings"]
+  const settings_query = await browser.storage.local.get("settings");
+  const settings = settings_query["settings"];
 
-  const objectStore = {"settings": {
-      ...settings,
-      "timeDelay": parseInt(delayInput.value),
-      "displayLimit": parseInt(displayLimitInput.value),
-      "serverAddress": serverAddress.value
-  }};
+  settings["timeDelay"] = parseInt(delayInput.value);
+  settings["displayLimit"] = parseInt(displayLimitInput.value);
+  settings["serverAddress"] = serverAddressInput.value;
+
+  const objectStore = {"settings": settings};
   browser.storage.local.set(objectStore);
 };
 
