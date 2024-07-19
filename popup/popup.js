@@ -138,6 +138,7 @@ document.getElementById("saveSettings").onclick = async () => {
 };
 
 document.getElementById("bulkDownloadButton").onclick = async () => {
+  await fetchAllWorks();
   const userAccept = confirm(`Warning: this will download ${worksData.length} works, are you sure you want to continue?`);
 
   if (!userAccept) {
@@ -145,7 +146,6 @@ document.getElementById("bulkDownloadButton").onclick = async () => {
     return;
   }
 
-  await fetchAllWorks();
   const worksReq = worksData.map((workData) => {
     return {work_id: workData.id, title: workData.title};
   });
