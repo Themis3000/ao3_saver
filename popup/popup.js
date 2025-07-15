@@ -22,6 +22,19 @@ browser.storage.local.get("settings", results => {
   serverAddress = settings["serverAddress"];
   disableLimit.checked = settings["disableLimit"];
 
+  // If the display limit is disabled, display all instead and return early.
+  if (settings["disableLimit"]) {
+    browser.storage.local.get().then(items => {
+      const items_list = [];
+      for (const [item_name, item] of Object.entries(items)) {
+        if (item_name.startsWith("work_"))
+          items_list.push(item);
+      }
+      listItems(items_list);
+    });
+    return;
+  }
+
   browser.storage.local.get("recentsIndex", async results => {
     const index = results["recentsIndex"];
     for (const item of index) {
