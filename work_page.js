@@ -29,6 +29,10 @@ browser.storage.local.get("settings", results => {
     settings["serverAddress"] = "https://ao3saver.com";
     do_settings_update = true;
   }
+  if (settings["disableLimit"] === undefined) {
+    settings["disableLimit"] = false;
+    do_settings_update = true;
+  }
   if (do_settings_update) {
     console.log("updating settings default value");
     browser.storage.local.set({"settings": settings});

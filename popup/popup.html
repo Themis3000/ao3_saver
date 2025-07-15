@@ -26,6 +26,10 @@
             <input type="number" min="1" placeholder="max 200" value="100" id="displayLimit" autocomplete="off" /><br>
             <p>Controls the number of works displayed in the list at a time</p>
 
+            <label for="disableLimit">Disable display limit:</label>
+            <input type="checkbox" id="disableLimit"><br>
+            <p>Disables the history display limit. Maybe cause lag if your history is very large</p>
+
             <label for="serverAddress">Server address</label>
             <input type="text" placeholder="your server address" value="http://127.0.0.1:8000" id="serverAddress" autocomplete="off" /><br>
             <p>Controls which ao3saver server you use. Only change if you know what you're doing.</p>
@@ -33,8 +37,12 @@
             <button id="saveSettings">Save</button>
         </div>
         <div id="bulkDownload">
-            <p>Use this button to bulk download all works you have viewed with this extension. This may take a while or be a large download. Use with caution</p>
+            <p>Use this button to bulk download all works you have viewed with this extension. This may take a while
+                or be a large download. Use with caution</p>
             <button id="bulkDownloadButton">Download everything</button>
+            <br>
+            <i>Unfortunately, this button is currently partially broken. You may need to reload the download page a
+                few times, or it may not work at all... I may fix it in the future, but it's low on my priority list</i>
         </div>
         <div class="links">
             <a href="https://ko-fi.com/D1D26LCOR" target="_blank">

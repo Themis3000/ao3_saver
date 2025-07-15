@@ -20,6 +20,7 @@ browser.storage.local.get("settings", results => {
   displayLimitInput.value = settings["displayLimit"].toString();
   serverAddressInput.value = settings["serverAddress"];
   serverAddress = settings["serverAddress"];
+  disableLimit.checked = settings["disableLimit"];
 
   browser.storage.local.get("recentsIndex", async results => {
     const index = results["recentsIndex"];
@@ -108,6 +109,7 @@ document.getElementById("backArrow").onclick = () => {
 const delayInput = document.getElementById("timeDelay");
 const displayLimitInput = document.getElementById("displayLimit");
 const serverAddressInput = document.getElementById("serverAddress");
+const disableLimit = document.getElementById("disableLimit");
 
 document.getElementById("saveSettings").onclick = async () => {
   const timeDelay = parseInt(delayInput.value);
@@ -132,6 +134,7 @@ document.getElementById("saveSettings").onclick = async () => {
   settings["timeDelay"] = parseInt(delayInput.value);
   settings["displayLimit"] = parseInt(displayLimitInput.value);
   settings["serverAddress"] = serverAddressInput.value;
+  settings["disableLimit"] = disableLimit.checked;
 
   const objectStore = {"settings": settings};
   browser.storage.local.set(objectStore);
