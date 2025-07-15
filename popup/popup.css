@@ -93,3 +93,8 @@ html body {
     width: 32px;
     height: 32px;
 }
+
+.links img {
+    width: 70vw;
+    height: auto;
+}
