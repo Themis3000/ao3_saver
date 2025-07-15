@@ -151,6 +151,7 @@ document.getElementById("saveSettings").onclick = async () => {
 
   const objectStore = {"settings": settings};
   browser.storage.local.set(objectStore);
+  window.location.reload();
 };
 
 document.getElementById("bulkDownloadButton").onclick = async () => {
